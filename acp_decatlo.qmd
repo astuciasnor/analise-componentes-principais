@@ -1,0 +1,173 @@
+---
+title: "Análise de Componentes Principais"
+subtitle: "Aplicação ao conjunto de dados de decatlo"
+author: "Evaldo Martins"
+date: "`r format(Sys.time(), '%m, %d, %Y')`"
+format:
+  html:
+    toc: true
+    toc-location: left
+    code-fold: true
+    theme: yeti
+    number-sections: true
+    highlight-style: tango
+editor: visual
+lang: pt-BR
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introdução
+
+A Análise de Componentes Principais (PCA) é uma técnica estatística multivariada utilizada para reduzir a dimensionalidade de um conjunto de dados, preservando o máximo de variabilidade possível. Neste documento, realizaremos uma PCA utilizando os dados do decatlo, aplicando os pacotes `FactoMineR` e `factoextra` no R.
+
+# Preparação do Ambiente
+
+## Carregando os Pacotes Necessários
+
+Para realizar a análise, precisamos carregar os pacotes que contêm as funções necessárias.
+
+```{r}
+#| label: pacotes
+#| warning: false
+#| message: false
+
+# Carregando os pacotes
+library(FactoMineR)
+library(factoextra)
+library(corrplot)
+library(knitr)
+```
+
+## Carregando os Dados
+
+Utilizaremos o conjunto de dados `decathlon2`, disponível no pacote `FactoMineR`.
+
+```{r}
+#| label: dados
+data(decathlon2)
+# Visualizando as primeiras linhas dos dados
+head(decathlon2)
+```
+
+# Explorando os Dados
+
+Antes de realizar a PCA, é importante entender a estrutura dos dados.
+
+## Descrição dos Dados
+
+O conjunto de dados `decathlon2` contém resultados de atletas em 10 provas de decatlo, além de informações adicionais.
+
+## Selecionando as Variáveis
+
+Selecionaremos apenas as variáveis numéricas referentes às provas.
+
+```{r}
+decathlon_data <- decathlon2[1:23, 1:10]
+```
+
+# Análise de Componentes Principais
+
+## Realizando a PCA
+
+Aplicamos a função `PCA` do pacote `FactoMineR` para executar a análise.
+
+```{r}
+res.pca <- PCA(decathlon_data, graph = FALSE)
+```
+
+## Resumo dos Resultados
+
+### Autovalores e Variância Explicada
+
+Analisamos os autovalores para entender a proporção de variância explicada por cada componente principal. A **tabela de autovalores e variância explicada** (@tbl-autoval) serve para avaliar a importância de cada componente principal na Análise de Componentes Principais (PCA). Os autovalores (eigenvalue) representam a quantidade de variância original dos dados que é capturada por cada componente principal. A variância explicada, expressa em porcentagem, indica a proporção da variância total dos dados que é retida por cada componente.
+
+```{r}
+#| label: tbl-autoval
+eig.val <- get_eigenvalue(res.pca)
+kable(eig.val, caption = "Autovalores e Variância Explicada")
+```
+
+A tabela indica que os primeiros três a cinco componentes principais capturam a maior parte da variabilidade dos dados do decatlo. Portanto, ao focar nesses componentes, conseguimos simplificar a estrutura dos dados, facilitando a visualização e interpretação, sem perder informações significativas
+
+### Gráfico de Scree Plot
+
+O Scree Plot ajuda a visualizar a quantidade de variância explicada.
+
+```{r}
+fviz_eig(res.pca, addlabels = TRUE, ylim = c(0, 50))
+```
+
+## Interpretação dos Componentes
+
+### Cargas Fatoriais
+
+Analisamos as contribuições das variáveis originais para os componentes principais.
+
+```{r}
+var <- get_pca_var(res.pca)
+kable(var$coord, caption = "Cargas Fatoriais das Variáveis")
+```
+
+### Gráfico das Variáveis
+
+Visualizamos as correlações entre as variáveis e os componentes principais.
+
+```{r}
+fviz_pca_var(res.pca, col.var = "contrib")
+```
+
+### Correlação Entre Variáveis
+
+Geramos uma matriz de correlação para entender as relações entre as variáveis.
+
+```{r}
+corrplot(cor(decathlon_data), method = "circle")
+```
+
+## Gráfico Biplot
+
+O gráfico biplot permite visualizar simultaneamente as variáveis e os indivíduos em um mesmo plano, facilitando a interpretação das relações entre eles.
+
+```{r}
+fviz_pca_biplot(res.pca, 
+                repel = TRUE,
+                col.var = "#2E9FDF", # Cor das variáveis
+                col.ind = "#696969") # Cor dos indivíduos
+```
+
+No biplot acima, as setas representam as variáveis originais, enquanto os pontos correspondem aos indivíduos (atletas). A proximidade entre um indivíduo e uma variável indica um alto valor nessa variável para o indivíduo em questão. Além disso, o ângulo entre as setas das variáveis indica a correlação entre elas. Variáveis com setas próximas indicam alta correlação positiva, enquanto setas em direções opostas indicam correlação negativa.
+
+# Análise dos Indivíduos
+
+## Coordenadas dos Indivíduos
+
+Examinamos as coordenadas dos indivíduos nos componentes principais.
+
+```{r}
+ind <- get_pca_ind(res.pca)
+kable(ind$coord, caption = "Coordenadas dos Indivíduos")
+```
+
+## Gráfico dos Indivíduos
+
+Visualizamos a distribuição dos atletas nos componentes principais.
+
+```{r}
+fviz_pca_ind(res.pca,
+             col.ind = "cos2",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+```
+
+Explicar o que é o cos2 e oque significa para análise. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Conclusão
+
+A PCA permitiu reduzir a dimensionalidade dos dados do decatlo, identificando os componentes principais que explicam a maior parte da variabilidade. As análises gráficas e numéricas auxiliaram na interpretação dos resultados, evidenciando as relações entre as provas e o desempenho dos atletas.
+
+# Referências
+
+-   Lê, S., Josse, J., & Husson, F. (2008). FactoMineR: An R package for multivariate analysis. *Journal of Statistical Software*, 25(1), 1-18.
+
+-   Kassambara, A., & Mundt, F. (2020). factoextra: Extract and visualize the results of multivariate data analyses. R package version 1.0.7.

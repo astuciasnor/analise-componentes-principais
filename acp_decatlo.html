@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Evaldo Martins">
+
+<title>Análise de Componentes Principais</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="acp_decatlo_files/libs/clipboard/clipboard.min.js"></script>
+<script src="acp_decatlo_files/libs/quarto-html/quarto.js"></script>
+<script src="acp_decatlo_files/libs/quarto-html/popper.min.js"></script>
+<script src="acp_decatlo_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="acp_decatlo_files/libs/quarto-html/anchor.min.js"></script>
+<link href="acp_decatlo_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="acp_decatlo_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="acp_decatlo_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="acp_decatlo_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="acp_decatlo_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Índice</h2>
+   
+  <ul>
+  <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução"><span class="header-section-number">1</span> Introdução</a></li>
+  <li><a href="#preparação-do-ambiente" id="toc-preparação-do-ambiente" class="nav-link" data-scroll-target="#preparação-do-ambiente"><span class="header-section-number">2</span> Preparação do Ambiente</a>
+  <ul class="collapse">
+  <li><a href="#carregando-os-pacotes-necessários" id="toc-carregando-os-pacotes-necessários" class="nav-link" data-scroll-target="#carregando-os-pacotes-necessários"><span class="header-section-number">2.1</span> Carregando os Pacotes Necessários</a></li>
+  <li><a href="#carregando-os-dados" id="toc-carregando-os-dados" class="nav-link" data-scroll-target="#carregando-os-dados"><span class="header-section-number">2.2</span> Carregando os Dados</a></li>
+  </ul></li>
+  <li><a href="#explorando-os-dados" id="toc-explorando-os-dados" class="nav-link" data-scroll-target="#explorando-os-dados"><span class="header-section-number">3</span> Explorando os Dados</a>
+  <ul class="collapse">
+  <li><a href="#descrição-dos-dados" id="toc-descrição-dos-dados" class="nav-link" data-scroll-target="#descrição-dos-dados"><span class="header-section-number">3.1</span> Descrição dos Dados</a></li>
+  <li><a href="#selecionando-as-variáveis" id="toc-selecionando-as-variáveis" class="nav-link" data-scroll-target="#selecionando-as-variáveis"><span class="header-section-number">3.2</span> Selecionando as Variáveis</a></li>
+  </ul></li>
+  <li><a href="#análise-de-componentes-principais" id="toc-análise-de-componentes-principais" class="nav-link" data-scroll-target="#análise-de-componentes-principais"><span class="header-section-number">4</span> Análise de Componentes Principais</a>
+  <ul class="collapse">
+  <li><a href="#realizando-a-pca" id="toc-realizando-a-pca" class="nav-link" data-scroll-target="#realizando-a-pca"><span class="header-section-number">4.1</span> Realizando a PCA</a></li>
+  <li><a href="#resumo-dos-resultados" id="toc-resumo-dos-resultados" class="nav-link" data-scroll-target="#resumo-dos-resultados"><span class="header-section-number">4.2</span> Resumo dos Resultados</a>
+  <ul class="collapse">
+  <li><a href="#autovalores-e-variância-explicada" id="toc-autovalores-e-variância-explicada" class="nav-link" data-scroll-target="#autovalores-e-variância-explicada"><span class="header-section-number">4.2.1</span> Autovalores e Variância Explicada</a></li>
+  <li><a href="#gráfico-de-scree-plot" id="toc-gráfico-de-scree-plot" class="nav-link" data-scroll-target="#gráfico-de-scree-plot"><span class="header-section-number">4.2.2</span> Gráfico de Scree Plot</a></li>
+  </ul></li>
+  <li><a href="#interpretação-dos-componentes" id="toc-interpretação-dos-componentes" class="nav-link" data-scroll-target="#interpretação-dos-componentes"><span class="header-section-number">4.3</span> Interpretação dos Componentes</a>
+  <ul class="collapse">
+  <li><a href="#cargas-fatoriais" id="toc-cargas-fatoriais" class="nav-link" data-scroll-target="#cargas-fatoriais"><span class="header-section-number">4.3.1</span> Cargas Fatoriais</a></li>
+  <li><a href="#gráfico-das-variáveis" id="toc-gráfico-das-variáveis" class="nav-link" data-scroll-target="#gráfico-das-variáveis"><span class="header-section-number">4.3.2</span> Gráfico das Variáveis</a></li>
+  <li><a href="#correlação-entre-variáveis" id="toc-correlação-entre-variáveis" class="nav-link" data-scroll-target="#correlação-entre-variáveis"><span class="header-section-number">4.3.3</span> Correlação Entre Variáveis</a></li>
+  </ul></li>
+  <li><a href="#gráfico-biplot" id="toc-gráfico-biplot" class="nav-link" data-scroll-target="#gráfico-biplot"><span class="header-section-number">4.4</span> Gráfico Biplot</a></li>
+  </ul></li>
+  <li><a href="#análise-dos-indivíduos" id="toc-análise-dos-indivíduos" class="nav-link" data-scroll-target="#análise-dos-indivíduos"><span class="header-section-number">5</span> Análise dos Indivíduos</a>
+  <ul class="collapse">
+  <li><a href="#coordenadas-dos-indivíduos" id="toc-coordenadas-dos-indivíduos" class="nav-link" data-scroll-target="#coordenadas-dos-indivíduos"><span class="header-section-number">5.1</span> Coordenadas dos Indivíduos</a></li>
+  <li><a href="#gráfico-dos-indivíduos" id="toc-gráfico-dos-indivíduos" class="nav-link" data-scroll-target="#gráfico-dos-indivíduos"><span class="header-section-number">5.2</span> Gráfico dos Indivíduos</a></li>
+  </ul></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6</span> Conclusão</a></li>
+  <li><a href="#referências" id="toc-referências" class="nav-link" data-scroll-target="#referências"><span class="header-section-number">7</span> Referências</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Análise de Componentes Principais</h1>
+<p class="subtitle lead">Aplicação ao conjunto de dados de decatlo</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor</div>
+    <div class="quarto-title-meta-contents">
+             <p>Evaldo Martins </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Data de Publicação</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">19 de outubro de 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introdução" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introdução</h1>
+<p>A Análise de Componentes Principais (PCA) é uma técnica estatística multivariada utilizada para reduzir a dimensionalidade de um conjunto de dados, preservando o máximo de variabilidade possível. Neste documento, realizaremos uma PCA utilizando os dados do decatlo, aplicando os pacotes <code>FactoMineR</code> e <code>factoextra</code> no R.</p>
+</section>
+<section id="preparação-do-ambiente" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Preparação do Ambiente</h1>
+<section id="carregando-os-pacotes-necessários" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="carregando-os-pacotes-necessários"><span class="header-section-number">2.1</span> Carregando os Pacotes Necessários</h2>
+<p>Para realizar a análise, precisamos carregar os pacotes que contêm as funções necessárias.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carregando os pacotes</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(FactoMineR)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="carregando-os-dados" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="carregando-os-dados"><span class="header-section-number">2.2</span> Carregando os Dados</h2>
+<p>Utilizaremos o conjunto de dados <code>decathlon2</code>, disponível no pacote <code>FactoMineR</code>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(decathlon2)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualizando as primeiras linhas dos dados</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(decathlon2)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>          X100m Long.jump Shot.put High.jump X400m X110m.hurdle Discus
+SEBRLE    11.04      7.58    14.83      2.07 49.81        14.69  43.75
+CLAY      10.76      7.40    14.26      1.86 49.37        14.05  50.72
+BERNARD   11.02      7.23    14.25      1.92 48.93        14.99  40.87
+YURKOV    11.34      7.09    15.19      2.10 50.42        15.31  46.26
+ZSIVOCZKY 11.13      7.30    13.48      2.01 48.62        14.17  45.67
+McMULLEN  10.83      7.31    13.76      2.13 49.91        14.38  44.41
+          Pole.vault Javeline X1500m Rank Points Competition
+SEBRLE          5.02    63.19  291.7    1   8217    Decastar
+CLAY            4.92    60.15  301.5    2   8122    Decastar
+BERNARD         5.32    62.77  280.1    4   8067    Decastar
+YURKOV          4.72    63.44  276.4    5   8036    Decastar
+ZSIVOCZKY       4.42    55.37  268.0    7   8004    Decastar
+McMULLEN        4.42    56.37  285.1    8   7995    Decastar</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="explorando-os-dados" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Explorando os Dados</h1>
+<p>Antes de realizar a PCA, é importante entender a estrutura dos dados.</p>
+<section id="descrição-dos-dados" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="descrição-dos-dados"><span class="header-section-number">3.1</span> Descrição dos Dados</h2>
+<p>O conjunto de dados <code>decathlon2</code> contém resultados de atletas em 10 provas de decatlo, além de informações adicionais.</p>
+</section>
+<section id="selecionando-as-variáveis" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="selecionando-as-variáveis"><span class="header-section-number">3.2</span> Selecionando as Variáveis</h2>
+<p>Selecionaremos apenas as variáveis numéricas referentes às provas.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>decathlon_data <span class="ot">&lt;-</span> decathlon2[<span class="dv">1</span><span class="sc">:</span><span class="dv">23</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="análise-de-componentes-principais" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Análise de Componentes Principais</h1>
+<section id="realizando-a-pca" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="realizando-a-pca"><span class="header-section-number">4.1</span> Realizando a PCA</h2>
+<p>Aplicamos a função <code>PCA</code> do pacote <code>FactoMineR</code> para executar a análise.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>res.pca <span class="ot">&lt;-</span> <span class="fu">PCA</span>(decathlon_data, <span class="at">graph =</span> <span class="cn">FALSE</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="resumo-dos-resultados" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="resumo-dos-resultados"><span class="header-section-number">4.2</span> Resumo dos Resultados</h2>
+<section id="autovalores-e-variância-explicada" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="autovalores-e-variância-explicada"><span class="header-section-number">4.2.1</span> Autovalores e Variância Explicada</h3>
+<p>Analisamos os autovalores para entender a proporção de variância explicada por cada componente principal. A <strong>tabela de autovalores e variância explicada</strong> (<a href="#tbl-autoval" class="quarto-xref">Tabela&nbsp;1</a>) serve para avaliar a importância de cada componente principal na Análise de Componentes Principais (PCA). Os autovalores (eigenvalue) representam a quantidade de variância original dos dados que é capturada por cada componente principal. A variância explicada, expressa em porcentagem, indica a proporção da variância total dos dados que é retida por cada componente.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>eig.val <span class="ot">&lt;-</span> <span class="fu">get_eigenvalue</span>(res.pca)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(eig.val, <span class="at">caption =</span> <span class="st">"Autovalores e Variância Explicada"</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-autoval" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-autoval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Tabela&nbsp;1: Autovalores e Variância Explicada
+</figcaption>
+<div aria-describedby="tbl-autoval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">eigenvalue</th>
+<th style="text-align: right;">variance.percent</th>
+<th style="text-align: right;">cumulative.variance.percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Dim.1</td>
+<td style="text-align: right;">4.1242133</td>
+<td style="text-align: right;">41.242134</td>
+<td style="text-align: right;">41.24213</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dim.2</td>
+<td style="text-align: right;">1.8385309</td>
+<td style="text-align: right;">18.385309</td>
+<td style="text-align: right;">59.62744</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dim.3</td>
+<td style="text-align: right;">1.2391403</td>
+<td style="text-align: right;">12.391403</td>
+<td style="text-align: right;">72.01885</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dim.4</td>
+<td style="text-align: right;">0.8194402</td>
+<td style="text-align: right;">8.194402</td>
+<td style="text-align: right;">80.21325</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dim.5</td>
+<td style="text-align: right;">0.7015528</td>
+<td style="text-align: right;">7.015528</td>
+<td style="text-align: right;">87.22878</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dim.6</td>
+<td style="text-align: right;">0.4228828</td>
+<td style="text-align: right;">4.228828</td>
+<td style="text-align: right;">91.45760</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dim.7</td>
+<td style="text-align: right;">0.3025817</td>
+<td style="text-align: right;">3.025816</td>
+<td style="text-align: right;">94.48342</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dim.8</td>
+<td style="text-align: right;">0.2744700</td>
+<td style="text-align: right;">2.744700</td>
+<td style="text-align: right;">97.22812</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dim.9</td>
+<td style="text-align: right;">0.1552169</td>
+<td style="text-align: right;">1.552169</td>
+<td style="text-align: right;">98.78029</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dim.10</td>
+<td style="text-align: right;">0.1219710</td>
+<td style="text-align: right;">1.219710</td>
+<td style="text-align: right;">100.00000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>A tabela indica que os primeiros três a cinco componentes principais capturam a maior parte da variabilidade dos dados do decatlo. Portanto, ao focar nesses componentes, conseguimos simplificar a estrutura dos dados, facilitando a visualização e interpretação, sem perder informações significativas</p>
+</section>
+<section id="gráfico-de-scree-plot" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="gráfico-de-scree-plot"><span class="header-section-number">4.2.2</span> Gráfico de Scree Plot</h3>
+<p>O Scree Plot ajuda a visualizar a quantidade de variância explicada.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_eig</span>(res.pca, <span class="at">addlabels =</span> <span class="cn">TRUE</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">50</span>))</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="acp_decatlo_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="interpretação-dos-componentes" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="interpretação-dos-componentes"><span class="header-section-number">4.3</span> Interpretação dos Componentes</h2>
+<section id="cargas-fatoriais" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="cargas-fatoriais"><span class="header-section-number">4.3.1</span> Cargas Fatoriais</h3>
+<p>Analisamos as contribuições das variáveis originais para os componentes principais.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>var <span class="ot">&lt;-</span> <span class="fu">get_pca_var</span>(res.pca)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(var<span class="sc">$</span>coord, <span class="at">caption =</span> <span class="st">"Cargas Fatoriais das Variáveis"</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Cargas Fatoriais das Variáveis</caption>
+<colgroup>
+<col style="width: 19%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Dim.1</th>
+<th style="text-align: right;">Dim.2</th>
+<th style="text-align: right;">Dim.3</th>
+<th style="text-align: right;">Dim.4</th>
+<th style="text-align: right;">Dim.5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">X100m</td>
+<td style="text-align: right;">-0.8506257</td>
+<td style="text-align: right;">-0.1793981</td>
+<td style="text-align: right;">0.3015564</td>
+<td style="text-align: right;">0.0335732</td>
+<td style="text-align: right;">-0.1944440</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Long.jump</td>
+<td style="text-align: right;">0.7941806</td>
+<td style="text-align: right;">0.2808570</td>
+<td style="text-align: right;">-0.1905465</td>
+<td style="text-align: right;">-0.1153896</td>
+<td style="text-align: right;">0.2331567</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Shot.put</td>
+<td style="text-align: right;">0.7339127</td>
+<td style="text-align: right;">0.0854041</td>
+<td style="text-align: right;">0.5175978</td>
+<td style="text-align: right;">0.1284684</td>
+<td style="text-align: right;">-0.2488129</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">High.jump</td>
+<td style="text-align: right;">0.6100840</td>
+<td style="text-align: right;">-0.4652142</td>
+<td style="text-align: right;">0.3300852</td>
+<td style="text-align: right;">0.1445501</td>
+<td style="text-align: right;">0.4027002</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">X400m</td>
+<td style="text-align: right;">-0.7016034</td>
+<td style="text-align: right;">0.2901783</td>
+<td style="text-align: right;">0.2835329</td>
+<td style="text-align: right;">0.4308255</td>
+<td style="text-align: right;">0.1039085</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">X110m.hurdle</td>
+<td style="text-align: right;">-0.7641252</td>
+<td style="text-align: right;">-0.0247408</td>
+<td style="text-align: right;">0.4488873</td>
+<td style="text-align: right;">-0.0168959</td>
+<td style="text-align: right;">0.2242200</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Discus</td>
+<td style="text-align: right;">0.7432090</td>
+<td style="text-align: right;">0.0496609</td>
+<td style="text-align: right;">0.1765252</td>
+<td style="text-align: right;">0.3950092</td>
+<td style="text-align: right;">-0.4082391</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pole.vault</td>
+<td style="text-align: right;">-0.2172680</td>
+<td style="text-align: right;">0.8074511</td>
+<td style="text-align: right;">0.0940577</td>
+<td style="text-align: right;">-0.3389848</td>
+<td style="text-align: right;">-0.2216853</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Javeline</td>
+<td style="text-align: right;">0.4282266</td>
+<td style="text-align: right;">0.3861093</td>
+<td style="text-align: right;">0.6041243</td>
+<td style="text-align: right;">-0.3317345</td>
+<td style="text-align: right;">0.1978128</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">X1500m</td>
+<td style="text-align: right;">0.0042785</td>
+<td style="text-align: right;">0.7844802</td>
+<td style="text-align: right;">-0.2194707</td>
+<td style="text-align: right;">0.4480096</td>
+<td style="text-align: right;">0.2632527</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="gráfico-das-variáveis" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="gráfico-das-variáveis"><span class="header-section-number">4.3.2</span> Gráfico das Variáveis</h3>
+<p>Visualizamos as correlações entre as variáveis e os componentes principais.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_pca_var</span>(res.pca, <span class="at">col.var =</span> <span class="st">"contrib"</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="acp_decatlo_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="correlação-entre-variáveis" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="correlação-entre-variáveis"><span class="header-section-number">4.3.3</span> Correlação Entre Variáveis</h3>
+<p>Geramos uma matriz de correlação para entender as relações entre as variáveis.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(<span class="fu">cor</span>(decathlon_data), <span class="at">method =</span> <span class="st">"circle"</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="acp_decatlo_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="gráfico-biplot" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="gráfico-biplot"><span class="header-section-number">4.4</span> Gráfico Biplot</h2>
+<p>O gráfico biplot permite visualizar simultaneamente as variáveis e os indivíduos em um mesmo plano, facilitando a interpretação das relações entre eles.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_pca_biplot</span>(res.pca, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">col.var =</span> <span class="st">"#2E9FDF"</span>, <span class="co"># Cor das variáveis</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">col.ind =</span> <span class="st">"#696969"</span>) <span class="co"># Cor dos indivíduos</span></span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="acp_decatlo_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>No biplot acima, as setas representam as variáveis originais, enquanto os pontos correspondem aos indivíduos (atletas). A proximidade entre um indivíduo e uma variável indica um alto valor nessa variável para o indivíduo em questão. Além disso, o ângulo entre as setas das variáveis indica a correlação entre elas. Variáveis com setas próximas indicam alta correlação positiva, enquanto setas em direções opostas indicam correlação negativa.</p>
+</section>
+</section>
+<section id="análise-dos-indivíduos" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Análise dos Indivíduos</h1>
+<section id="coordenadas-dos-indivíduos" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="coordenadas-dos-indivíduos"><span class="header-section-number">5.1</span> Coordenadas dos Indivíduos</h2>
+<p>Examinamos as coordenadas dos indivíduos nos componentes principais.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ind <span class="ot">&lt;-</span> <span class="fu">get_pca_ind</span>(res.pca)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(ind<span class="sc">$</span>coord, <span class="at">caption =</span> <span class="st">"Coordenadas dos Indivíduos"</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Coordenadas dos Indivíduos</caption>
+<colgroup>
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Dim.1</th>
+<th style="text-align: right;">Dim.2</th>
+<th style="text-align: right;">Dim.3</th>
+<th style="text-align: right;">Dim.4</th>
+<th style="text-align: right;">Dim.5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">SEBRLE</td>
+<td style="text-align: right;">0.1955047</td>
+<td style="text-align: right;">1.5890567</td>
+<td style="text-align: right;">0.6424912</td>
+<td style="text-align: right;">0.0838965</td>
+<td style="text-align: right;">1.1682939</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CLAY</td>
+<td style="text-align: right;">0.8078795</td>
+<td style="text-align: right;">2.4748137</td>
+<td style="text-align: right;">-1.3873827</td>
+<td style="text-align: right;">1.2983823</td>
+<td style="text-align: right;">-0.8249821</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BERNARD</td>
+<td style="text-align: right;">-1.3591340</td>
+<td style="text-align: right;">1.6480950</td>
+<td style="text-align: right;">0.2005584</td>
+<td style="text-align: right;">-1.9640942</td>
+<td style="text-align: right;">0.0841935</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">YURKOV</td>
+<td style="text-align: right;">-0.8889532</td>
+<td style="text-align: right;">-0.4426067</td>
+<td style="text-align: right;">2.5295843</td>
+<td style="text-align: right;">0.7129084</td>
+<td style="text-align: right;">0.4078226</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ZSIVOCZKY</td>
+<td style="text-align: right;">-0.1081216</td>
+<td style="text-align: right;">-2.0688377</td>
+<td style="text-align: right;">-1.3342591</td>
+<td style="text-align: right;">-0.1015280</td>
+<td style="text-align: right;">-0.2014522</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">McMULLEN</td>
+<td style="text-align: right;">0.1212195</td>
+<td style="text-align: right;">-1.0139102</td>
+<td style="text-align: right;">-0.8625170</td>
+<td style="text-align: right;">1.3416429</td>
+<td style="text-align: right;">1.6215129</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MARTINEAU</td>
+<td style="text-align: right;">-2.4461206</td>
+<td style="text-align: right;">-1.3138017</td>
+<td style="text-align: right;">0.9183545</td>
+<td style="text-align: right;">0.3814830</td>
+<td style="text-align: right;">-2.2937703</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">HERNU</td>
+<td style="text-align: right;">-1.9335505</td>
+<td style="text-align: right;">1.2049469</td>
+<td style="text-align: right;">0.1599256</td>
+<td style="text-align: right;">0.9113324</td>
+<td style="text-align: right;">-0.1295897</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BARRAS</td>
+<td style="text-align: right;">-1.8143379</td>
+<td style="text-align: right;">-0.4218036</td>
+<td style="text-align: right;">-0.6729699</td>
+<td style="text-align: right;">0.2338693</td>
+<td style="text-align: right;">-0.2390921</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NOOL</td>
+<td style="text-align: right;">-2.8394182</td>
+<td style="text-align: right;">-1.6080212</td>
+<td style="text-align: right;">-0.6208959</td>
+<td style="text-align: right;">-1.5904398</td>
+<td style="text-align: right;">1.4561921</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOURGUIGNON</td>
+<td style="text-align: right;">-4.5129309</td>
+<td style="text-align: right;">1.2919755</td>
+<td style="text-align: right;">0.0102629</td>
+<td style="text-align: right;">0.6817399</td>
+<td style="text-align: right;">0.4285722</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sebrle</td>
+<td style="text-align: right;">3.5290188</td>
+<td style="text-align: right;">1.2442692</td>
+<td style="text-align: right;">1.7158834</td>
+<td style="text-align: right;">-0.8268824</td>
+<td style="text-align: right;">-0.0256161</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Clay</td>
+<td style="text-align: right;">3.3907555</td>
+<td style="text-align: right;">1.6597737</td>
+<td style="text-align: right;">0.6323029</td>
+<td style="text-align: right;">-0.3239190</td>
+<td style="text-align: right;">0.5819564</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Karpov</td>
+<td style="text-align: right;">4.1618361</td>
+<td style="text-align: right;">-0.8162937</td>
+<td style="text-align: right;">-1.0378288</td>
+<td style="text-align: right;">0.3204063</td>
+<td style="text-align: right;">-0.8153479</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Macey</td>
+<td style="text-align: right;">1.8900060</td>
+<td style="text-align: right;">-2.1102680</td>
+<td style="text-align: right;">1.0012937</td>
+<td style="text-align: right;">0.5978315</td>
+<td style="text-align: right;">-0.0002206</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Warners</td>
+<td style="text-align: right;">1.4185318</td>
+<td style="text-align: right;">0.2882441</td>
+<td style="text-align: right;">-2.0446388</td>
+<td style="text-align: right;">-1.0425133</td>
+<td style="text-align: right;">-0.0414513</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Zsivoczky</td>
+<td style="text-align: right;">0.4821513</td>
+<td style="text-align: right;">-0.9475719</td>
+<td style="text-align: right;">1.7669951</td>
+<td style="text-align: right;">-0.1889854</td>
+<td style="text-align: right;">0.4164570</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hernu</td>
+<td style="text-align: right;">0.2825218</td>
+<td style="text-align: right;">-1.1919254</td>
+<td style="text-align: right;">-0.1743971</td>
+<td style="text-align: right;">-0.8677682</td>
+<td style="text-align: right;">-0.7049754</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bernard</td>
+<td style="text-align: right;">1.3979877</td>
+<td style="text-align: right;">-1.5112538</td>
+<td style="text-align: right;">-0.8500641</td>
+<td style="text-align: right;">0.7620663</td>
+<td style="text-align: right;">0.8791254</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schwarzl</td>
+<td style="text-align: right;">-0.7262410</td>
+<td style="text-align: right;">0.6732231</td>
+<td style="text-align: right;">-1.0641424</td>
+<td style="text-align: right;">-0.9480131</td>
+<td style="text-align: right;">-0.2952465</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pogorelov</td>
+<td style="text-align: right;">-0.2191699</td>
+<td style="text-align: right;">0.8804077</td>
+<td style="text-align: right;">-0.3042988</td>
+<td style="text-align: right;">1.3860697</td>
+<td style="text-align: right;">-0.0153914</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schoenbeck</td>
+<td style="text-align: right;">-0.5064487</td>
+<td style="text-align: right;">1.3292713</td>
+<td style="text-align: right;">-0.1053186</td>
+<td style="text-align: right;">-0.2548795</td>
+<td style="text-align: right;">-0.6597270</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Barras</td>
+<td style="text-align: right;">-0.3229862</td>
+<td style="text-align: right;">-0.8377832</td>
+<td style="text-align: right;">0.8810612</td>
+<td style="text-align: right;">-0.6026055</td>
+<td style="text-align: right;">-0.7972634</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="gráfico-dos-indivíduos" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="gráfico-dos-indivíduos"><span class="header-section-number">5.2</span> Gráfico dos Indivíduos</h2>
+<p>Visualizamos a distribuição dos atletas nos componentes principais.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Código</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_pca_ind</span>(res.pca,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">col.ind =</span> <span class="st">"cos2"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">gradient.cols =</span> <span class="fu">c</span>(<span class="st">"#00AFBB"</span>, <span class="st">"#E7B800"</span>, <span class="st">"#FC4E07"</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">repel =</span> <span class="cn">TRUE</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="acp_decatlo_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Explicar o que é o cos2 e oque significa para análise. xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
+</section>
+</section>
+<section id="conclusão" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Conclusão</h1>
+<p>A PCA permitiu reduzir a dimensionalidade dos dados do decatlo, identificando os componentes principais que explicam a maior parte da variabilidade. As análises gráficas e numéricas auxiliaram na interpretação dos resultados, evidenciando as relações entre as provas e o desempenho dos atletas.</p>
+</section>
+<section id="referências" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Referências</h1>
+<ul>
+<li><p>Lê, S., Josse, J., &amp; Husson, F. (2008). FactoMineR: An R package for multivariate analysis. <em>Journal of Statistical Software</em>, 25(1), 1-18.</p></li>
+<li><p>Kassambara, A., &amp; Mundt, F. (2020). factoextra: Extract and visualize the results of multivariate data analyses. R package version 1.0.7.</p></li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copiada");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copiada");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

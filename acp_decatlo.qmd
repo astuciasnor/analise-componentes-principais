@@ -70,7 +70,7 @@ decathlon_data <- decathlon2[1:23, 1:10]
 
 ## Realizando a PCA
 
-Aplicamos a função `PCA` do pacote `FactoMineR` para executar a análise.
+Aplicamos a função `PCA` do pacote `FactoMineR` para executar a análise. Esta função já faz a padronização das variáveis automaticamente.
 
 ```{r}
 res.pca <- PCA(decathlon_data, graph = FALSE)

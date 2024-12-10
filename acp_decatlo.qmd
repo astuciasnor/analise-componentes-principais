@@ -48,6 +48,9 @@ Utilizaremos o conjunto de dados `decathlon2`, disponível no pacote `FactoMineR
 data(decathlon2)
 # Visualizando as primeiras linhas dos dados
 head(decathlon2)
+
+library(readxl)
+dados <- read_excel("")
 ```
 
 # Explorando os Dados
